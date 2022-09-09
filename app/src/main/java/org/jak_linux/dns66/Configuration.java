@@ -60,7 +60,11 @@ public class Configuration {
         for (int i = config.minorVersion + 1; i <= MINOR_VERSION; i++) {
             config.runUpdate(i);
         }
-        config.updateURL("http://someonewhocares.org/hosts/hosts", "https://someonewhocares.org/hosts/hosts", 0);
+        config.updateURL(
+                "http://someonewhocares.org/hosts/hosts",
+                "https://someonewhocares.org/hosts/hosts",
+                0
+        );
 
 
         return config;

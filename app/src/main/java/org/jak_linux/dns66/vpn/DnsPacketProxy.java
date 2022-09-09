@@ -141,7 +141,7 @@ public class DnsPacketProxy {
      */
     void handleDnsRequest(byte[] packetData) throws AdVpnThread.VpnNetworkException {
 
-        IpPacket parsedPacket = null;
+        IpPacket parsedPacket;
         try {
             parsedPacket = (IpPacket) IpSelector.newPacket(packetData, 0, packetData.length);
         } catch (Exception e) {

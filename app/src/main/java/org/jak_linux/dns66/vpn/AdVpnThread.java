@@ -347,7 +347,6 @@ class AdVpnThread implements Runnable, DnsPacketProxy.EventLoop {
                 }
             }
             Log.w(TAG, "handleDnsRequest: Could not send packet to upstream", e);
-            return;
         }
     }
 
