@@ -7,9 +7,10 @@
  */
 package org.jak_linux.dns66.main;
 
-import androidx.recyclerview.widget.RecyclerView;
-import androidx.recyclerview.widget.ItemTouchHelper;
 import android.util.Log;
+
+import androidx.recyclerview.widget.ItemTouchHelper;
+import androidx.recyclerview.widget.RecyclerView;
 
 import org.jak_linux.dns66.FileHelper;
 import org.jak_linux.dns66.MainActivity;

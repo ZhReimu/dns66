@@ -2,8 +2,9 @@ package org.jak_linux.dns66;
 
 import android.content.Context;
 import android.os.Build;
-import androidx.annotation.Nullable;
 import android.util.AttributeSet;
+
+import androidx.annotation.Nullable;
 
 /**
  * Workaround for Android 5.0 and 5.1 not correctly scaling vector drawables.

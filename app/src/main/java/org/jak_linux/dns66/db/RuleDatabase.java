@@ -8,8 +8,9 @@
 package org.jak_linux.dns66.db;
 
 import android.content.Context;
-import androidx.annotation.Nullable;
 import android.util.Log;
+
+import androidx.annotation.Nullable;
 
 import org.jak_linux.dns66.Configuration;
 import org.jak_linux.dns66.FileHelper;
@@ -34,7 +35,7 @@ public class RuleDatabase {
 
     private static final String TAG = "RuleDatabase";
     private static final RuleDatabase instance = new RuleDatabase();
-    final AtomicReference<HashSet<String>> blockedHosts = new AtomicReference<>(new HashSet<String>());
+    final AtomicReference<HashSet<String>> blockedHosts = new AtomicReference<>(new HashSet<>());
     HashSet<String> nextBlockedHosts = null;
 
     /**
@@ -167,7 +168,6 @@ public class RuleDatabase {
 
         if (reader == null) {
             addHost(item, item.location);
-            return;
         } else {
             loadReader(item, reader);
         }

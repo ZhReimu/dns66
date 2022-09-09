@@ -13,21 +13,20 @@ import android.content.pm.PackageManager;
 import android.graphics.drawable.Drawable;
 import android.os.AsyncTask;
 import android.os.Bundle;
-import androidx.fragment.app.Fragment;
-import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
-import androidx.recyclerview.widget.DividerItemDecoration;
-import androidx.recyclerview.widget.LinearLayoutManager;
-import androidx.recyclerview.widget.RecyclerView;
 import android.util.Log;
 import android.view.LayoutInflater;
-import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.CompoundButton;
 import android.widget.ImageView;
 import android.widget.PopupMenu;
 import android.widget.Switch;
 import android.widget.TextView;
+
+import androidx.fragment.app.Fragment;
+import androidx.recyclerview.widget.DividerItemDecoration;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
+import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 
 import org.jak_linux.dns66.BuildConfig;
 import org.jak_linux.dns66.Configuration;
@@ -37,7 +36,6 @@ import org.jak_linux.dns66.R;
 
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -74,64 +72,52 @@ public class AllowlistFragment extends Fragment {
 
         swipeRefresh = (SwipeRefreshLayout) rootView.findViewById(R.id.swiperefresh);
         swipeRefresh.setOnRefreshListener(
-                new SwipeRefreshLayout.OnRefreshListener() {
-                    @Override
-                    public void onRefresh() {
-                        appListGenerator = new AppListGenerator(getContext());
-                        appListGenerator.execute();
-                    }
+                () -> {
+                    appListGenerator = new AppListGenerator(getContext());
+                    appListGenerator.execute();
                 }
         );
         swipeRefresh.setRefreshing(true);
 
         Switch switchShowSystemApps = (Switch) rootView.findViewById(R.id.switch_show_system_apps);
         switchShowSystemApps.setChecked(MainActivity.config.allowlist.showSystemApps);
-        switchShowSystemApps.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
-            @Override
-            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-                MainActivity.config.allowlist.showSystemApps = isChecked;
-                FileHelper.writeSettings(getContext(), MainActivity.config);
-                appListGenerator = new AppListGenerator(getContext());
-                appListGenerator.execute();
-            }
+        switchShowSystemApps.setOnCheckedChangeListener((buttonView, isChecked) -> {
+            MainActivity.config.allowlist.showSystemApps = isChecked;
+            FileHelper.writeSettings(getContext(), MainActivity.config);
+            appListGenerator = new AppListGenerator(getContext());
+            appListGenerator.execute();
         });
 
         final TextView allowlistDefaultText = (TextView) rootView.findViewById(R.id.allowlist_default_text);
         allowlistDefaultText.setText(getResources().getStringArray(R.array.allowlist_defaults)[MainActivity.config.allowlist.defaultMode]);
-        View.OnClickListener onDefaultChangeClicked = new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                PopupMenu menu = new PopupMenu(getContext(), rootView.findViewById(R.id.change_default));
-                menu.inflate(R.menu.allowlist_popup);
-                menu.setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener() {
-                    @Override
-                    public boolean onMenuItemClick(MenuItem item) {
-                        Log.d(TAG, "onMenuItemClick: Setting" + item);
-                        switch (item.getItemId()) {
-                            case R.id.allowlist_default_on_vpn:
-                                Log.d(TAG, "onMenuItemClick: OnVpn");
-                                MainActivity.config.allowlist.defaultMode = Configuration.Allowlist.DEFAULT_MODE_ON_VPN;
-                                break;
-                            case R.id.allowlist_default_not_on_vpn:
-                                Log.d(TAG, "onMenuItemClick: NotOnVpn");
-                                MainActivity.config.allowlist.defaultMode = Configuration.Allowlist.DEFAULT_MODE_NOT_ON_VPN;
-                                break;
-                            case R.id.allowlist_default_intelligent:
-                                Log.d(TAG, "onMenuItemClick: Intelligent");
-                                MainActivity.config.allowlist.defaultMode = Configuration.Allowlist.DEFAULT_MODE_INTELLIGENT;
-                                break;
-                        }
+        View.OnClickListener onDefaultChangeClicked = v -> {
+            PopupMenu menu = new PopupMenu(getContext(), rootView.findViewById(R.id.change_default));
+            menu.inflate(R.menu.allowlist_popup);
+            menu.setOnMenuItemClickListener(item -> {
+                Log.d(TAG, "onMenuItemClick: Setting" + item);
+                switch (item.getItemId()) {
+                    case R.id.allowlist_default_on_vpn:
+                        Log.d(TAG, "onMenuItemClick: OnVpn");
+                        MainActivity.config.allowlist.defaultMode = Configuration.Allowlist.DEFAULT_MODE_ON_VPN;
+                        break;
+                    case R.id.allowlist_default_not_on_vpn:
+                        Log.d(TAG, "onMenuItemClick: NotOnVpn");
+                        MainActivity.config.allowlist.defaultMode = Configuration.Allowlist.DEFAULT_MODE_NOT_ON_VPN;
+                        break;
+                    case R.id.allowlist_default_intelligent:
+                        Log.d(TAG, "onMenuItemClick: Intelligent");
+                        MainActivity.config.allowlist.defaultMode = Configuration.Allowlist.DEFAULT_MODE_INTELLIGENT;
+                        break;
+                }
 
-                        allowlistDefaultText.setText(getResources().getStringArray(R.array.allowlist_defaults)[MainActivity.config.allowlist.defaultMode]);
-                        appListGenerator = new AppListGenerator(getContext());
-                        appListGenerator.execute();
-                        FileHelper.writeSettings(getContext(), MainActivity.config);
-                        return true;
-                    }
-                });
+                allowlistDefaultText.setText(getResources().getStringArray(R.array.allowlist_defaults)[MainActivity.config.allowlist.defaultMode]);
+                appListGenerator = new AppListGenerator(getContext());
+                appListGenerator.execute();
+                FileHelper.writeSettings(getContext(), MainActivity.config);
+                return true;
+            });
 
-                menu.show();
-            }
+            menu.show();
         };
 
         rootView.findViewById(R.id.change_default).setOnClickListener(onDefaultChangeClicked);
@@ -148,11 +134,11 @@ public class AllowlistFragment extends Fragment {
 
     private class AppListAdapter extends RecyclerView.Adapter<AppListAdapter.ViewHolder> {
 
-        public ArrayList<ListEntry> list;
-        public PackageManager pm;
+        public final ArrayList<ListEntry> list;
+        public final PackageManager pm;
 
-        Set<String> onVpn = new HashSet<>();
-        Set<String> notOnVpn = new HashSet<>();
+        final Set<String> onVpn = new HashSet<>();
+        final Set<String> notOnVpn = new HashSet<>();
 
         public AppListAdapter(PackageManager pm, ArrayList<ListEntry> list) {
             this.list = list;
@@ -203,34 +189,26 @@ public class AllowlistFragment extends Fragment {
             holder.details.setText(entry.getPackageName());
             holder.allowlistSwitch.setOnCheckedChangeListener(null);
             holder.allowlistSwitch.setChecked(notOnVpn.contains(entry.getPackageName()));
-            holder.allowlistSwitch.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
-                @Override
-                public void onCheckedChanged(CompoundButton compoundButton, boolean checked) {
-                    /* No change, do nothing */
-                    if (checked && MainActivity.config.allowlist.items.contains(entry.getPackageName()))
-                        return;
-                    if (!checked && MainActivity.config.allowlist.itemsOnVpn.contains(entry.getPackageName()))
-                        return;
-                    if (checked) {
-                        MainActivity.config.allowlist.items.add(entry.getPackageName());
-                        MainActivity.config.allowlist.itemsOnVpn.remove(entry.getPackageName());
-                        notOnVpn.add(entry.getPackageName());
-                    } else {
-                        MainActivity.config.allowlist.items.remove(entry.getPackageName());
-                        MainActivity.config.allowlist.itemsOnVpn.add(entry.getPackageName());
-                        notOnVpn.remove(entry.getPackageName());
-                    }
-                    FileHelper.writeSettings(getActivity(), MainActivity.config);
+            holder.allowlistSwitch.setOnCheckedChangeListener((compoundButton, checked) -> {
+                /* No change, do nothing */
+                if (checked && MainActivity.config.allowlist.items.contains(entry.getPackageName()))
+                    return;
+                if (!checked && MainActivity.config.allowlist.itemsOnVpn.contains(entry.getPackageName()))
+                    return;
+                if (checked) {
+                    MainActivity.config.allowlist.items.add(entry.getPackageName());
+                    MainActivity.config.allowlist.itemsOnVpn.remove(entry.getPackageName());
+                    notOnVpn.add(entry.getPackageName());
+                } else {
+                    MainActivity.config.allowlist.items.remove(entry.getPackageName());
+                    MainActivity.config.allowlist.itemsOnVpn.add(entry.getPackageName());
+                    notOnVpn.remove(entry.getPackageName());
                 }
+                FileHelper.writeSettings(getActivity(), MainActivity.config);
             });
 
 
-            holder.itemView.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View view) {
-                    holder.allowlistSwitch.setChecked(!holder.allowlistSwitch.isChecked());
-                }
-            });
+            holder.itemView.setOnClickListener(view -> holder.allowlistSwitch.setChecked(!holder.allowlistSwitch.isChecked()));
 
         }
 
@@ -240,10 +218,10 @@ public class AllowlistFragment extends Fragment {
         }
 
         public class ViewHolder extends RecyclerView.ViewHolder {
-            ImageView icon;
-            TextView name;
-            TextView details;
-            Switch allowlistSwitch;
+            final ImageView icon;
+            final TextView name;
+            final TextView details;
+            final Switch allowlistSwitch;
             AsyncTask<ListEntry, Void, Drawable> task;
 
             public ViewHolder(View itemView) {
@@ -257,7 +235,7 @@ public class AllowlistFragment extends Fragment {
     }
 
     private final class AppListGenerator extends AsyncTask<Void, Void, AppListAdapter> {
-        private PackageManager pm;
+        private final PackageManager pm;
 
         private AppListGenerator(Context context) {
             pm = context.getPackageManager();
@@ -267,7 +245,7 @@ public class AllowlistFragment extends Fragment {
         protected AppListAdapter doInBackground(Void... params) {
             List<ApplicationInfo> info = pm.getInstalledApplications(0);
 
-            Collections.sort(info, new ApplicationInfo.DisplayNameComparator(pm));
+            info.sort(new ApplicationInfo.DisplayNameComparator(pm));
 
             final ArrayList<ListEntry> entries = new ArrayList<>();
             for (ApplicationInfo appInfo : info) {
@@ -289,9 +267,9 @@ public class AllowlistFragment extends Fragment {
     }
 
     private static class ListEntry {
-        private ApplicationInfo appInfo;
-        private String packageName;
-        private String label;
+        private final ApplicationInfo appInfo;
+        private final String packageName;
+        private final String label;
         private WeakReference<Drawable> weakIcon;
 
         private ListEntry(ApplicationInfo appInfo, String packageName, String label) {

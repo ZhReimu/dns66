@@ -173,9 +173,8 @@ public final class FileHelper {
                 Os.close(fd);
         } catch (ErrnoException e) {
             Log.e(tag, "closeOrWarn: " + message, e);
-        } finally {
-            return null;
         }
+        return null;
     }
 
     public static <T extends Closeable> T closeOrWarn(T fd, String tag, String message) {
@@ -184,8 +183,7 @@ public final class FileHelper {
                 fd.close();
         } catch (Exception e) {
             Log.e(tag, "closeOrWarn: " + message, e);
-        } finally {
-            return null;
         }
+        return null;
     }
 }

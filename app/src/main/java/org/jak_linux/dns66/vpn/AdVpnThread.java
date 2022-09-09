@@ -26,7 +26,6 @@ import android.system.ErrnoException;
 import android.system.Os;
 import android.system.OsConstants;
 import android.system.StructPollfd;
-import android.util.ArraySet;
 import android.util.Log;
 
 import org.jak_linux.dns66.Configuration;
@@ -83,7 +82,7 @@ class AdVpnThread implements Runnable, DnsPacketProxy.EventLoop {
     /**
      * Number of iterations since we last cleared the pcap4j cache
      */
-    private int pcap4jFactoryClearCacheCounter = 0;
+    private final int pcap4jFactoryClearCacheCounter = 0;
 
     public AdVpnThread(VpnService vpnService, Notify notify) {
         this.vpnService = vpnService;
@@ -469,7 +468,7 @@ class AdVpnThread implements Runnable, DnsPacketProxy.EventLoop {
         upstreamDnsServers.clear();
         if (config.dnsServers.enabled) {
             for (Configuration.Item item : config.dnsServers.items) {
-                if (item.state == item.STATE_ALLOW) {
+                if (item.state == Configuration.Item.STATE_ALLOW) {
                     try {
                         newDNSServer(builder, format, ipv6Template, InetAddress.getByName(item.location));
                     } catch (Exception e) {
@@ -569,7 +568,7 @@ class AdVpnThread implements Runnable, DnsPacketProxy.EventLoop {
      * Queue of WaitingOnSocketPacket, bound on time and space.
      */
     private static class WospList implements Iterable<WaitingOnSocketPacket> {
-        private final LinkedList<WaitingOnSocketPacket> list = new LinkedList<WaitingOnSocketPacket>();
+        private final LinkedList<WaitingOnSocketPacket> list = new LinkedList<>();
 
         void add(WaitingOnSocketPacket wosp) {
             if (list.size() > DNS_MAXIMUM_WAITING) {

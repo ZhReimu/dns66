@@ -8,20 +8,19 @@
 package org.jak_linux.dns66.main;
 
 import android.os.Bundle;
-import com.google.android.material.floatingactionbutton.FloatingActionButton;
-import androidx.fragment.app.Fragment;
-import androidx.recyclerview.widget.LinearLayoutManager;
-import androidx.recyclerview.widget.RecyclerView;
-import androidx.recyclerview.widget.ItemTouchHelper;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.CompoundButton;
 import android.widget.Switch;
 
-import org.jak_linux.dns66.Configuration;
+import androidx.fragment.app.Fragment;
+import androidx.recyclerview.widget.ItemTouchHelper;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
+
+import com.google.android.material.floatingactionbutton.FloatingActionButton;
+
 import org.jak_linux.dns66.FileHelper;
-import org.jak_linux.dns66.ItemChangedListener;
 import org.jak_linux.dns66.MainActivity;
 import org.jak_linux.dns66.R;
 import org.jak_linux.dns66.db.RuleDatabaseUpdateJobService;
@@ -54,23 +53,17 @@ public class HostsFragment extends Fragment implements FloatingActionButtonFragm
 
         Switch hostEnabled = (Switch) rootView.findViewById(R.id.host_enabled);
         hostEnabled.setChecked(MainActivity.config.hosts.enabled);
-        hostEnabled.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
-            @Override
-            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-                MainActivity.config.hosts.enabled = isChecked;
-                FileHelper.writeSettings(getContext(), MainActivity.config);
-            }
+        hostEnabled.setOnCheckedChangeListener((buttonView, isChecked) -> {
+            MainActivity.config.hosts.enabled = isChecked;
+            FileHelper.writeSettings(getContext(), MainActivity.config);
         });
 
         Switch automaticRefresh = (Switch) rootView.findViewById(R.id.automatic_refresh);
         automaticRefresh.setChecked(MainActivity.config.hosts.automaticRefresh);
-        automaticRefresh.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
-            @Override
-            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-                MainActivity.config.hosts.automaticRefresh = isChecked;
-                FileHelper.writeSettings(getContext(), MainActivity.config);
-                RuleDatabaseUpdateJobService.scheduleOrCancel(getContext(), MainActivity.config);
-            }
+        automaticRefresh.setOnCheckedChangeListener((buttonView, isChecked) -> {
+            MainActivity.config.hosts.automaticRefresh = isChecked;
+            FileHelper.writeSettings(getContext(), MainActivity.config);
+            RuleDatabaseUpdateJobService.scheduleOrCancel(getContext(), MainActivity.config);
         });
 
 
@@ -80,19 +73,13 @@ public class HostsFragment extends Fragment implements FloatingActionButtonFragm
     }
 
     public void setupFloatingActionButton(FloatingActionButton fab) {
-        fab.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                final MainActivity main = (MainActivity) getActivity();
-                main.editItem(3, null, new ItemChangedListener() {
-                    @Override
-                    public void onItemChanged(Configuration.Item item) {
-                        MainActivity.config.hosts.items.add(item);
-                        mAdapter.notifyItemInserted(mAdapter.getItemCount() - 1);
-                        FileHelper.writeSettings(getContext(), MainActivity.config);
-                    }
-                });
-            }
+        fab.setOnClickListener(view -> {
+            final MainActivity main = (MainActivity) getActivity();
+            main.editItem(3, null, item -> {
+                MainActivity.config.hosts.items.add(item);
+                mAdapter.notifyItemInserted(mAdapter.getItemCount() - 1);
+                FileHelper.writeSettings(getContext(), MainActivity.config);
+            });
         });
     }
 

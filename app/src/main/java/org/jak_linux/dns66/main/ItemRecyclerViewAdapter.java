@@ -8,16 +8,16 @@
 package org.jak_linux.dns66.main;
 
 import android.content.Context;
-import androidx.recyclerview.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import androidx.recyclerview.widget.RecyclerView;
+
 import org.jak_linux.dns66.Configuration;
 import org.jak_linux.dns66.FileHelper;
-import org.jak_linux.dns66.ItemChangedListener;
 import org.jak_linux.dns66.MainActivity;
 import org.jak_linux.dns66.R;
 
@@ -116,18 +116,15 @@ public class ItemRecyclerViewAdapter extends RecyclerView.Adapter<ItemRecyclerVi
             } else if (v == view) {
                 // Start edit activity
                 MainActivity main = (MainActivity) v.getContext();
-                main.editItem(stateChoices, item, new ItemChangedListener() {
-                            @Override
-                            public void onItemChanged(Configuration.Item changedItem) {
-                                if (changedItem == null) {
-                                    items.remove(position);
-                                    notifyItemRemoved(position);
-                                } else {
-                                    items.set(position, changedItem);
-                                    ItemRecyclerViewAdapter.this.notifyItemChanged(position);
-                                }
-                                FileHelper.writeSettings(itemView.getContext(), MainActivity.config);
+                main.editItem(stateChoices, item, changedItem -> {
+                            if (changedItem == null) {
+                                items.remove(position);
+                                notifyItemRemoved(position);
+                            } else {
+                                items.set(position, changedItem);
+                                ItemRecyclerViewAdapter.this.notifyItemChanged(position);
                             }
+                            FileHelper.writeSettings(itemView.getContext(), MainActivity.config);
                         }
                 );
             }

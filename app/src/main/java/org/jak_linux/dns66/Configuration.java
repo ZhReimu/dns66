@@ -37,7 +37,7 @@ public class Configuration {
     /* Default tweak level */
     static final int MINOR_VERSION = 3;
     private static final String TAG = "Configuration";
-    public int version = 1;
+    public final int version = 1;
     public int minorVersion = 0;
     public boolean autoStart;
     public Hosts hosts = new Hosts();
@@ -73,7 +73,7 @@ public class Configuration {
                 updateURL("http://someonewhocares.org/hosts/hosts", "https://someonewhocares.org/hosts/hosts", -1);
 
                 /* Switch to StevenBlack's host file */
-                addURL(0,   "StevenBlack's hosts file (includes all others)",
+                addURL(0, "StevenBlack's hosts file (includes all others)",
                         "https://raw.githubusercontent.com/StevenBlack/hosts/master/hosts",
                         Item.STATE_DENY);
                 updateURL("https://someonewhocares.org/hosts/hosts", null, Item.STATE_IGNORE);
@@ -115,6 +115,7 @@ public class Configuration {
                 host.location = newIP;
         }
     }
+
     public void addDNS(String title, String location, boolean isEnabled) {
         Item item = new Item();
         item.title = title;
@@ -133,7 +134,7 @@ public class Configuration {
 
     public void removeURL(String oldURL) {
 
-        Iterator itr = hosts.items.iterator();
+        Iterator<Item> itr = hosts.items.iterator();
         while (itr.hasNext()) {
             Item host = (Item) itr.next();
             if (host.location.equals(oldURL))
@@ -144,9 +145,7 @@ public class Configuration {
 
     public void disableURL(String oldURL) {
         Log.d(TAG, String.format("disableURL: Disabling %s", oldURL));
-        Iterator itr = hosts.items.iterator();
-        while (itr.hasNext()) {
-            Item host = (Item) itr.next();
+        for (Item host : hosts.items) {
             if (host.location.equals(oldURL))
                 host.state = Item.STATE_IGNORE;
         }
@@ -177,7 +176,7 @@ public class Configuration {
 
     public static class DnsServers {
         public boolean enabled;
-        public List<Item> items = new ArrayList<>();
+        public final List<Item> items = new ArrayList<>();
     }
 
     public static class Allowlist {
@@ -202,11 +201,11 @@ public class Configuration {
         /**
          * Apps that should not be allowed on the VPN
          */
-        public List<String> items = new ArrayList<>();
+        public final List<String> items = new ArrayList<>();
         /**
          * Apps that should be on the VPN
          */
-        public List<String> itemsOnVpn = new ArrayList<>();
+        public final List<String> itemsOnVpn = new ArrayList<>();
 
         /**
          * Categorizes all packages in the system into "on vpn" or
@@ -217,7 +216,7 @@ public class Configuration {
          * @param notOnVpn Names of packages not to use the VPN
          */
         public void resolve(PackageManager pm, Set<String> onVpn, Set<String> notOnVpn) {
-            Set<String> webBrowserPackageNames = new HashSet<String>();
+            Set<String> webBrowserPackageNames = new HashSet<>();
             List<ResolveInfo> resolveInfoList = pm.queryIntentActivities(newBrowserIntent(), 0);
             for (ResolveInfo resolveInfo : resolveInfoList) {
                 webBrowserPackageNames.add(resolveInfo.activityInfo.packageName);

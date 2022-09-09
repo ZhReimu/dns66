@@ -10,26 +10,11 @@ package org.jak_linux.dns66;
 import android.app.AlertDialog;
 import android.content.BroadcastReceiver;
 import android.content.Context;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
-
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
-
-import com.google.android.material.floatingactionbutton.FloatingActionButton;
-import com.google.android.material.tabs.TabLayout;
-
-import androidx.fragment.app.Fragment;
-import androidx.localbroadcastmanager.content.LocalBroadcastManager;
-import androidx.viewpager.widget.ViewPager;
-import androidx.appcompat.app.AppCompatActivity;
-import androidx.appcompat.app.AppCompatDelegate;
-import androidx.appcompat.widget.Toolbar;
-
 import android.text.Html;
 import android.util.Log;
 import android.view.Menu;
@@ -39,6 +24,18 @@ import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.TextView;
 import android.widget.Toast;
+
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.app.AppCompatDelegate;
+import androidx.appcompat.widget.Toolbar;
+import androidx.fragment.app.Fragment;
+import androidx.localbroadcastmanager.content.LocalBroadcastManager;
+import androidx.viewpager.widget.ViewPager;
+
+import com.google.android.material.floatingactionbutton.FloatingActionButton;
+import com.google.android.material.tabs.TabLayout;
 
 import org.jak_linux.dns66.db.RuleDatabaseUpdateJobService;
 import org.jak_linux.dns66.db.RuleDatabaseUpdateTask;
@@ -191,19 +188,13 @@ public class MainActivity extends AppCompatActivity {
                         .setIcon(R.drawable.ic_warning)
                         .setTitle(R.string.disable_notification_title)
                         .setMessage(R.string.disable_notification_message)
-                        .setPositiveButton(R.string.disable_notification_ack, new DialogInterface.OnClickListener() {
-                            @Override
-                            public void onClick(DialogInterface dialogInterface, int i) {
-                                item.setChecked(!item.isChecked());
-                                MainActivity.config.showNotification = item.isChecked();
-                                FileHelper.writeSettings(MainActivity.this, MainActivity.config);
-                            }
+                        .setPositiveButton(R.string.disable_notification_ack, (dialogInterface, i) -> {
+                            item.setChecked(!item.isChecked());
+                            MainActivity.config.showNotification = item.isChecked();
+                            FileHelper.writeSettings(MainActivity.this, MainActivity.config);
                         })
-                        .setNegativeButton(R.string.disable_notification_nak, new DialogInterface.OnClickListener() {
-                            @Override
-                            public void onClick(DialogInterface dialogInterface, int i) {
+                        .setNegativeButton(R.string.disable_notification_nak, (dialogInterface, i) -> {
 
-                            }
                         }).show();
                 break;
             case R.id.action_about:
@@ -310,19 +301,11 @@ public class MainActivity extends AppCompatActivity {
         }
         if (requestCode == REQUEST_FILE_STORE && resultCode == RESULT_OK) {
             Uri selectedfile = data.getData(); //The uri with the location of the file
-            Writer writer = null;
-            try {
-                writer = new OutputStreamWriter(getContentResolver().openOutputStream(selectedfile));
+            try (Writer writer = new OutputStreamWriter(getContentResolver().openOutputStream(selectedfile))) {
                 config.write(writer);
                 writer.close();
             } catch (Exception e) {
                 Toast.makeText(this, "Cannot write file: " + e.getMessage(), Toast.LENGTH_SHORT).show();
-            } finally {
-                try {
-                    writer.close();
-                } catch (Exception ignored) {
-
-                }
             }
             recreate();
         }

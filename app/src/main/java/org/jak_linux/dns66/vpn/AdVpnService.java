@@ -25,12 +25,13 @@ import android.net.VpnService;
 import android.os.Build;
 import android.os.Handler;
 import android.os.Message;
+import android.util.Log;
+
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.core.app.NotificationCompat;
 import androidx.core.content.ContextCompat;
 import androidx.localbroadcastmanager.content.LocalBroadcastManager;
-import android.util.Log;
 
 import org.jak_linux.dns66.Configuration;
 import org.jak_linux.dns66.FileHelper;
@@ -45,22 +46,10 @@ public class AdVpnService extends VpnService implements Handler.Callback {
     public static final int NOTIFICATION_ID_STATE = 10;
     public static final int REQUEST_CODE_START = 43;
     public static final int REQUEST_CODE_PAUSE = 42;
+    private final Handler handler = new MyHandler(this);
 
-    /* The handler may only keep a weak reference around, otherwise it leaks */
-    private static class MyHandler extends Handler {
-        private final WeakReference<Handler.Callback> callback;
-        public MyHandler(Handler.Callback callback) {
-            this.callback = new WeakReference<Callback>(callback);
-        }
-        @Override
-        public void handleMessage(Message msg) {
-            Handler.Callback callback = this.callback.get();
-            if (callback != null) {
-                callback.handleMessage(msg);
-            }
-            super.handleMessage(msg);
-        }
-    }
+    private AdVpnThread vpnThread = new AdVpnThread(this, value -> handler.sendMessage(handler.obtainMessage(VPN_MSG_STATUS_UPDATE, value, 0)));
+
     public static final int VPN_STATUS_STARTING = 0;
     public static final int VPN_STATUS_RUNNING = 1;
     public static final int VPN_STATUS_STOPPING = 2;
@@ -75,13 +64,19 @@ public class AdVpnService extends VpnService implements Handler.Callback {
     private static final String TAG = "VpnService";
     // TODO: Temporary Hack til refactor is done
     public static int vpnStatus = VPN_STATUS_STOPPED;
-    private final Handler handler = new MyHandler(this);
-    private AdVpnThread vpnThread = new AdVpnThread(this, new AdVpnThread.Notify() {
-        @Override
-        public void run(int value) {
-            handler.sendMessage(handler.obtainMessage(VPN_MSG_STATUS_UPDATE, value, 0));
-        }
-    });
+
+
+    @Override
+    public void onCreate() {
+        super.onCreate();
+        NotificationChannels.onCreate(this);
+
+        notificationBuilder.addAction(R.drawable.ic_pause_black_24dp, getString(R.string.notification_action_pause),
+                        PendingIntent.getService(this, REQUEST_CODE_PAUSE, new Intent(this, AdVpnService.class)
+                                .putExtra("COMMAND", Command.PAUSE.ordinal()), 0))
+                .setColor(ContextCompat.getColor(this, R.color.colorPrimaryDark));
+    }
+
     private final BroadcastReceiver connectivityChangedReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
@@ -113,15 +108,22 @@ public class AdVpnService extends VpnService implements Handler.Callback {
         }
     }
 
-    @Override
-    public void onCreate() {
-        super.onCreate();
-        NotificationChannels.onCreate(this);
+    /* The handler may only keep a weak reference around, otherwise it leaks */
+    private static class MyHandler extends Handler {
+        private final WeakReference<Handler.Callback> callback;
 
-        notificationBuilder.addAction(R.drawable.ic_pause_black_24dp, getString(R.string.notification_action_pause),
-                PendingIntent.getService(this, REQUEST_CODE_PAUSE, new Intent(this, AdVpnService.class)
-                                .putExtra("COMMAND", Command.PAUSE.ordinal()), 0))
-                .setColor(ContextCompat.getColor(this, R.color.colorPrimaryDark));
+        public MyHandler(Handler.Callback callback) {
+            this.callback = new WeakReference<>(callback);
+        }
+
+        @Override
+        public void handleMessage(Message msg) {
+            Handler.Callback callback = this.callback.get();
+            if (callback != null) {
+                callback.handleMessage(msg);
+            }
+            super.handleMessage(msg);
+        }
     }
 
     public static void checkStartVpnOnBoot(Context context) {

@@ -7,26 +7,28 @@
  */
 package org.jak_linux.dns66.main;
 
+import static android.app.Activity.RESULT_CANCELED;
+import static android.app.Activity.RESULT_OK;
+
 import android.app.AlertDialog;
 import android.app.PendingIntent;
 import android.content.Context;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.net.VpnService;
 import android.os.Build;
 import android.os.Bundle;
-import androidx.fragment.app.Fragment;
-import androidx.core.content.ContextCompat;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
-import android.widget.CompoundButton;
 import android.widget.ImageView;
 import android.widget.Switch;
 import android.widget.TextView;
 import android.widget.Toast;
+
+import androidx.core.content.ContextCompat;
+import androidx.fragment.app.Fragment;
 
 import org.jak_linux.dns66.Configuration;
 import org.jak_linux.dns66.FileHelper;
@@ -38,110 +40,11 @@ import org.jak_linux.dns66.vpn.Command;
 import java.io.IOException;
 import java.io.InputStreamReader;
 
-import static android.app.Activity.RESULT_CANCELED;
-import static android.app.Activity.RESULT_OK;
-
 public class StartFragment extends Fragment {
     public static final int REQUEST_START_VPN = 1;
     private static final String TAG = "StartFragment";
 
     public StartFragment() {
-    }
-
-    @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container,
-                             Bundle savedInstanceState) {
-        View rootView = inflater.inflate(R.layout.fragment_start, container, false);
-        Switch switchOnBoot = (Switch) rootView.findViewById(R.id.switch_onboot);
-
-        ImageView view = (ImageView) rootView.findViewById(R.id.state_image);
-
-        view.setOnLongClickListener(new View.OnLongClickListener() {
-            @Override
-            public boolean onLongClick(View v) {
-                return startStopService();
-            }
-        });
-
-        Button startButton = (Button) rootView.findViewById(R.id.start_button);
-        startButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                startStopService();
-            }
-        });
-
-        updateStatus(rootView, AdVpnService.vpnStatus);
-
-        switchOnBoot.setChecked(MainActivity.config.autoStart);
-        switchOnBoot.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
-            @Override
-            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-                MainActivity.config.autoStart = isChecked;
-                FileHelper.writeSettings(getContext(), MainActivity.config);
-            }
-        });
-
-        Switch watchDog = (Switch) rootView.findViewById(R.id.watchdog);
-        watchDog.setChecked(MainActivity.config.watchDog);
-        watchDog.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
-            @Override
-            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-                MainActivity.config.watchDog = isChecked;
-                FileHelper.writeSettings(getContext(), MainActivity.config);
-
-                if (isChecked) {
-                    new AlertDialog.Builder(getActivity())
-                            .setIcon(R.drawable.ic_warning)
-                            .setTitle(R.string.unstable_feature)
-                            .setMessage(R.string.unstable_watchdog_message)
-                            .setNegativeButton(R.string.button_cancel, new DialogInterface.OnClickListener() {
-                                @Override
-                                public void onClick(DialogInterface dialog, int which) {
-                                    watchDog.setChecked(false);
-                                    MainActivity.config.watchDog = false;
-                                    FileHelper.writeSettings(getContext(), MainActivity.config);
-                                }
-                            })
-                            .setPositiveButton(R.string.button_continue, new DialogInterface.OnClickListener() {
-                                @Override
-                                public void onClick(DialogInterface dialog, int which) {
-                                    /* Do nothing */
-                                }
-                            })
-                            .show();
-                    return;
-                } else {
-                }
-            }
-        });
-
-        Switch ipV6Support = (Switch) rootView.findViewById(R.id.ipv6_support);
-        ipV6Support.setChecked(MainActivity.config.ipV6Support);
-        ipV6Support.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
-            @Override
-            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-                MainActivity.config.ipV6Support = isChecked;
-                FileHelper.writeSettings(getContext(), MainActivity.config);
-            }
-        });
-
-        ExtraBar.setup(rootView.findViewById(R.id.extra_bar), "start");
-
-        return rootView;
-    }
-
-    private boolean startStopService() {
-        if (AdVpnService.vpnStatus != AdVpnService.VPN_STATUS_STOPPED) {
-            Log.i(TAG, "Attempting to disconnect");
-
-            Intent intent = new Intent(getActivity(), AdVpnService.class);
-            intent.putExtra("COMMAND", Command.STOP.ordinal());
-            getActivity().startService(intent);
-        } else {
-            checkHostsFilesAndStartService();
-        }
-        return true;
     }
 
     public static void updateStatus(View rootView, int status) {
@@ -157,7 +60,7 @@ public class StartFragment extends Fragment {
         stateImage.setContentDescription(rootView.getContext().getString(AdVpnService.vpnStatusToTextId(status)));
         stateImage.setImageAlpha(255);
         stateImage.setImageTintList(ContextCompat.getColorStateList(context, R.color.colorStateImage));
-        switch(status) {
+        switch (status) {
             case AdVpnService.VPN_STATUS_RECONNECTING:
             case AdVpnService.VPN_STATUS_STARTING:
             case AdVpnService.VPN_STATUS_STOPPING:
@@ -181,24 +84,85 @@ public class StartFragment extends Fragment {
         }
     }
 
+    private boolean startStopService() {
+        if (AdVpnService.vpnStatus != AdVpnService.VPN_STATUS_STOPPED) {
+            Log.i(TAG, "Attempting to disconnect");
+
+            Intent intent = new Intent(getActivity(), AdVpnService.class);
+            intent.putExtra("COMMAND", Command.STOP.ordinal());
+            getActivity().startService(intent);
+        } else {
+            checkHostsFilesAndStartService();
+        }
+        return true;
+    }
+
+    @Override
+    public View onCreateView(LayoutInflater inflater, ViewGroup container,
+                             Bundle savedInstanceState) {
+        View rootView = inflater.inflate(R.layout.fragment_start, container, false);
+        Switch switchOnBoot = (Switch) rootView.findViewById(R.id.switch_onboot);
+
+        ImageView view = (ImageView) rootView.findViewById(R.id.state_image);
+
+        view.setOnLongClickListener(v -> startStopService());
+
+        Button startButton = (Button) rootView.findViewById(R.id.start_button);
+        startButton.setOnClickListener(v -> startStopService());
+
+        updateStatus(rootView, AdVpnService.vpnStatus);
+
+        switchOnBoot.setChecked(MainActivity.config.autoStart);
+        switchOnBoot.setOnCheckedChangeListener((buttonView, isChecked) -> {
+            MainActivity.config.autoStart = isChecked;
+            FileHelper.writeSettings(getContext(), MainActivity.config);
+        });
+
+        Switch watchDog = (Switch) rootView.findViewById(R.id.watchdog);
+        watchDog.setChecked(MainActivity.config.watchDog);
+        watchDog.setOnCheckedChangeListener((buttonView, isChecked) -> {
+            MainActivity.config.watchDog = isChecked;
+            FileHelper.writeSettings(getContext(), MainActivity.config);
+
+            if (isChecked) {
+                new AlertDialog.Builder(getActivity())
+                        .setIcon(R.drawable.ic_warning)
+                        .setTitle(R.string.unstable_feature)
+                        .setMessage(R.string.unstable_watchdog_message)
+                        .setNegativeButton(R.string.button_cancel, (dialog, which) -> {
+                            watchDog.setChecked(false);
+                            MainActivity.config.watchDog = false;
+                            FileHelper.writeSettings(getContext(), MainActivity.config);
+                        })
+                        .setPositiveButton(R.string.button_continue, (dialog, which) -> {
+                            /* Do nothing */
+                        })
+                        .show();
+            }
+        });
+
+        Switch ipV6Support = (Switch) rootView.findViewById(R.id.ipv6_support);
+        ipV6Support.setChecked(MainActivity.config.ipV6Support);
+        ipV6Support.setOnCheckedChangeListener((buttonView, isChecked) -> {
+            MainActivity.config.ipV6Support = isChecked;
+            FileHelper.writeSettings(getContext(), MainActivity.config);
+        });
+
+        ExtraBar.setup(rootView.findViewById(R.id.extra_bar), "start");
+
+        return rootView;
+    }
+
     private void checkHostsFilesAndStartService() {
         if (!areHostsFilesExistant()) {
             new AlertDialog.Builder(getActivity())
                     .setIcon(R.drawable.ic_warning)
                     .setTitle(R.string.missing_hosts_files_title)
                     .setMessage(R.string.missing_hosts_files_message)
-                    .setNegativeButton(R.string.button_no, new DialogInterface.OnClickListener() {
-                        @Override
-                        public void onClick(DialogInterface dialog, int which) {
-                            /* Do nothing */
-                        }
+                    .setNegativeButton(R.string.button_no, (dialog, which) -> {
+                        /* Do nothing */
                     })
-                    .setPositiveButton(R.string.button_yes, new DialogInterface.OnClickListener() {
-                        @Override
-                        public void onClick(DialogInterface dialog, int which) {
-                            startService();
-                        }
-                    })
+                    .setPositiveButton(R.string.button_yes, (dialog, which) -> startService())
                     .show();
             return;
         }

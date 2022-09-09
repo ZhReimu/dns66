@@ -10,8 +10,9 @@ package org.jak_linux.dns66.db;
 import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
-import androidx.annotation.NonNull;
 import android.util.Log;
+
+import androidx.annotation.NonNull;
 
 import org.jak_linux.dns66.Configuration;
 import org.jak_linux.dns66.FileHelper;
@@ -118,7 +119,7 @@ class RuleDatabaseItemUpdateRunnable implements Runnable {
             downloadFile(file, singleWriterMultipleReaderFile, connection);
         } catch (SocketTimeoutException e) {
             parentTask.addError(item, context.getString(R.string.requested_timed_out));
-        }catch (IOException e) {
+        } catch (IOException e) {
             parentTask.addError(item, context.getString(R.string.unknown_error_s, e.toString()));
         } finally {
             parentTask.addDone(item);

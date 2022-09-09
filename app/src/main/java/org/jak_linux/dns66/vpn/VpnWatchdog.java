@@ -12,8 +12,9 @@
  */
 package org.jak_linux.dns66.vpn;
 
-import androidx.annotation.NonNull;
 import android.util.Log;
+
+import androidx.annotation.NonNull;
 
 import java.io.IOException;
 import java.net.DatagramPacket;

@@ -30,17 +30,15 @@ public class RuleDatabaseUpdateJobService extends JobService {
 
     /**
      * Schedules or cancels the job, depending on the configuration
-     *
-     * @return true if the job could be scheduled.
      */
-    public static boolean scheduleOrCancel(Context context, Configuration configuration) {
+    public static void scheduleOrCancel(Context context, Configuration configuration) {
         JobScheduler scheduler = (JobScheduler) context.getSystemService(Context.JOB_SCHEDULER_SERVICE);
 
         if (!configuration.hosts.automaticRefresh) {
             Log.d(TAG, "scheduleOrCancel: Cancelling Job");
 
             scheduler.cancel(JOB_ID);
-            return true;
+            return;
         }
         Log.d(TAG, "scheduleOrCancel: Scheduling Job");
 
@@ -61,7 +59,6 @@ public class RuleDatabaseUpdateJobService extends JobService {
         else
             Log.d(TAG, "Job not scheduled");
 
-        return result == JobScheduler.RESULT_SUCCESS;
     }
 
     @Override

@@ -13,7 +13,6 @@ import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.OutputStream;
 
 /**
  * A file that multiple readers can safely read from and a single
@@ -39,6 +38,7 @@ public class SingleWriterMultipleReaderFile {
 
     /**
      * Opens the known-good file for reading.
+     *
      * @return A {@link FileInputStream} to read from
      * @throws FileNotFoundException See {@link FileInputStream}
      */
@@ -48,6 +48,7 @@ public class SingleWriterMultipleReaderFile {
 
     /**
      * Starts a write.
+     *
      * @return A writable stream.
      * @throws IOException If the work file cannot be replaced or opened for writing.
      */
@@ -60,6 +61,7 @@ public class SingleWriterMultipleReaderFile {
 
     /**
      * Atomically replaces the active file with the work file, and closes the stream.
+     *
      * @param stream
      * @throws IOException
      */
@@ -79,6 +81,7 @@ public class SingleWriterMultipleReaderFile {
 
     /**
      * Atomically replaces the active file with the work file, and closes the stream.
+     *
      * @param stream
      * @throws IOException
      */

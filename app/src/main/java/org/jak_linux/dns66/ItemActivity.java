@@ -14,9 +14,6 @@ import android.content.Intent;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.Bundle;
-import com.google.android.material.textfield.TextInputEditText;
-import androidx.core.content.ContextCompat;
-import androidx.appcompat.app.AppCompatActivity;
 import android.util.Log;
 import android.util.TypedValue;
 import android.view.Menu;
@@ -27,6 +24,11 @@ import android.widget.AdapterView;
 import android.widget.ImageView;
 import android.widget.Spinner;
 import android.widget.Switch;
+
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.content.ContextCompat;
+
+import com.google.android.material.textfield.TextInputEditText;
 
 public class ItemActivity extends AppCompatActivity {
 
@@ -126,24 +128,21 @@ public class ItemActivity extends AppCompatActivity {
 
         // We have an attachment icon for host files
         if (intent.getIntExtra("STATE_CHOICES", 3) == 3) {
-            locationText.setOnTouchListener(new View.OnTouchListener() {
-                @Override
-                public boolean onTouch(View v, MotionEvent event) {
-                    if (event.getAction() == MotionEvent.ACTION_UP) {
-                        boolean isAttachIcon;
-                        if (locationText.getLayoutDirection() == View.LAYOUT_DIRECTION_LTR)
-                            isAttachIcon = event.getRawX() >= locationText.getRight() - locationText.getTotalPaddingRight();
-                        else
-                            isAttachIcon = event.getRawX() <= locationText.getTotalPaddingLeft() - locationText.getLeft();
+            locationText.setOnTouchListener((v, event) -> {
+                if (event.getAction() == MotionEvent.ACTION_UP) {
+                    boolean isAttachIcon;
+                    if (locationText.getLayoutDirection() == View.LAYOUT_DIRECTION_LTR)
+                        isAttachIcon = event.getRawX() >= locationText.getRight() - locationText.getTotalPaddingRight();
+                    else
+                        isAttachIcon = event.getRawX() <= locationText.getTotalPaddingLeft() - locationText.getLeft();
 
-                        if (isAttachIcon) {
-                            performFileSearch();
-                            return true;
-                        }
-
+                    if (isAttachIcon) {
+                        performFileSearch();
+                        return true;
                     }
-                    return false;
+
                 }
+                return false;
             });
 
             // Tint the attachment icon, if any.
