@@ -14,6 +14,7 @@ import android.app.AlertDialog;
 import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
+import android.graphics.drawable.Drawable;
 import android.net.VpnService;
 import android.os.Build;
 import android.os.Bundle;
@@ -27,6 +28,7 @@ import android.widget.Switch;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import androidx.appcompat.content.res.AppCompatResources;
 import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
 
@@ -47,6 +49,10 @@ public class StartFragment extends Fragment {
     public StartFragment() {
     }
 
+    private static Drawable getDrawable(Context context, int res) {
+        return AppCompatResources.getDrawable(context, res);
+    }
+
     public static void updateStatus(View rootView, int status) {
         Context context = rootView.getContext();
         TextView stateText = (TextView) rootView.findViewById(R.id.state_textview);
@@ -64,21 +70,21 @@ public class StartFragment extends Fragment {
             case AdVpnService.VPN_STATUS_RECONNECTING:
             case AdVpnService.VPN_STATUS_STARTING:
             case AdVpnService.VPN_STATUS_STOPPING:
-                stateImage.setImageDrawable(context.getDrawable(R.drawable.ic_settings_black_24dp));
+                stateImage.setImageDrawable(getDrawable(context, R.drawable.ic_settings_black_24dp));
                 startButton.setText(R.string.action_stop);
                 break;
             case AdVpnService.VPN_STATUS_STOPPED:
                 stateImage.setImageAlpha(32);
                 stateImage.setImageTintList(null);
-                stateImage.setImageDrawable(context.getDrawable(R.mipmap.app_icon_large));
+                stateImage.setImageDrawable(getDrawable(context, R.mipmap.app_icon_large));
                 startButton.setText(R.string.action_start);
                 break;
             case AdVpnService.VPN_STATUS_RUNNING:
-                stateImage.setImageDrawable(context.getDrawable(R.drawable.ic_verified_user_black_24dp));
+                stateImage.setImageDrawable(getDrawable(context, R.drawable.ic_verified_user_black_24dp));
                 startButton.setText(R.string.action_stop);
                 break;
             case AdVpnService.VPN_STATUS_RECONNECTING_NETWORK_ERROR:
-                stateImage.setImageDrawable(context.getDrawable(R.drawable.ic_error_black_24dp));
+                stateImage.setImageDrawable(getDrawable(context, R.drawable.ic_error_black_24dp));
                 startButton.setText(R.string.action_stop);
                 break;
         }
@@ -90,7 +96,7 @@ public class StartFragment extends Fragment {
 
             Intent intent = new Intent(getActivity(), AdVpnService.class);
             intent.putExtra("COMMAND", Command.STOP.ordinal());
-            getActivity().startService(intent);
+            requireActivity().startService(intent);
         } else {
             checkHostsFilesAndStartService();
         }
@@ -219,9 +225,9 @@ public class StartFragment extends Fragment {
                     PendingIntent.getActivity(getContext(), 0,
                             new Intent(getContext(), MainActivity.class), 0));
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                getContext().startForegroundService(intent);
+                requireContext().startForegroundService(intent);
             } else {
-                getContext().startService(intent);
+                requireContext().startService(intent);
             }
 
         }
